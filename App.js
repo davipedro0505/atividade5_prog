@@ -13,7 +13,7 @@ import {
 
 const Stack = createNativeStackNavigator();
 
-// 🔐 LOGIN
+
 function Login({ navigation }) {
   return (
     <View style={styles.container}>
@@ -28,7 +28,6 @@ function Login({ navigation }) {
   );
 }
 
-// 👤 CADASTRO USUÁRIO
 function CadastroUsuario({ navigation }) {
   return (
     <View style={styles.container}>
@@ -44,7 +43,6 @@ function CadastroUsuario({ navigation }) {
   );
 }
 
-// 📋 LISTA
 function Lista({ navigation }) {
 
   const [contatos, setContatos] = useState([
@@ -88,7 +86,6 @@ function Lista({ navigation }) {
   );
 }
 
-// ➕ CADASTRO CONTATO
 function CadastroContato({ route, navigation }) {
 
   const { contatos, setContatos } = route.params;
@@ -122,7 +119,6 @@ function CadastroContato({ route, navigation }) {
   );
 }
 
-// ✏️ EDITAR / EXCLUIR
 function EditarContato({ route, navigation }) {
 
   const { contato, contatos, setContatos } = route.params;
@@ -160,7 +156,6 @@ function EditarContato({ route, navigation }) {
   );
 }
 
-// 🚀 APP
 export default function App() {
   return (
     <NavigationContainer>
@@ -175,7 +170,6 @@ export default function App() {
   );
 }
 
-// 🎨 ESTILO
 const styles = StyleSheet.create({
   container: {
     flex: 1,
