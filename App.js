@@ -14,7 +14,7 @@ import {
 
 const Stack = createNativeStackNavigator();
 
-function Login({ navigation }) {
+function Login({ navigation, usuarios, contatos, setContatos }) {
   const [login, setLogin] = useState('');
   const [senha, setSenha] = useState('');
 
@@ -39,9 +39,7 @@ function Login({ navigation }) {
   );
 }
 
-function CadastroUsuario({ navigation, route }) {
-  const { usuarios, setUsuarios } = route.params;
-
+function CadastroUsuario({ navigation, usuarios, setUsuarios }) {
   const [nome, setNome] = useState('');
   const [cpf, setCpf] = useState('');
   const [email, setEmail] = useState('');
@@ -79,17 +77,12 @@ function CadastroUsuario({ navigation, route }) {
   );
 }
 
-function Lista({ navigation, route }) {
-  const { contatos, setContatos } = route.params;
-
+function Lista({ navigation, contatos, setContatos }) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Lista de Contatos</Text>
 
-      <Button
-        title="Adicionar Contato"
-        onPress={() => navigation.navigate("CadastroContato", { contatos, setContatos })}
-      />
+      <Button title="Adicionar Contato" onPress={() => navigation.navigate("CadastroContato")} />
 
       <FlatList
         data={contatos}
@@ -98,11 +91,7 @@ function Lista({ navigation, route }) {
           <TouchableOpacity
             style={styles.item}
             onPress={() =>
-              navigation.navigate("EditarContato", {
-                contato: item,
-                contatos,
-                setContatos
-              })
+              navigation.navigate("EditarContato", { contato: item })
             }
           >
             <Text style={styles.nome}>{item.nome}</Text>
@@ -114,9 +103,7 @@ function Lista({ navigation, route }) {
   );
 }
 
-function CadastroContato({ route, navigation }) {
-  const { contatos, setContatos } = route.params;
-
+function CadastroContato({ navigation, contatos, setContatos }) {
   const [nome, setNome] = useState('');
   const [telefone, setTelefone] = useState('');
   const [email, setEmail] = useState('');
@@ -151,8 +138,8 @@ function CadastroContato({ route, navigation }) {
   );
 }
 
-function EditarContato({ route, navigation }) {
-  const { contato, contatos, setContatos } = route.params;
+function EditarContato({ navigation, route, contatos, setContatos }) {
+  const { contato } = route.params;
 
   const [nome, setNome] = useState(contato.nome);
   const [telefone, setTelefone] = useState(contato.telefone);
@@ -188,33 +175,41 @@ function EditarContato({ route, navigation }) {
 }
 
 export default function App() {
-  const [contatos, setContatos] = useState([
-    {
-      id: '1',
-      nome: "Marcos Andrade",
-      telefone: "81 988553424",
-      email: "marcos@gmail.com"
-    }
-  ]);
-
+  const [contatos, setContatos] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
 
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        <Stack.Screen name="Login" component={Login} />
-        <Stack.Screen
-          name="CadastroUsuario"
-          component={CadastroUsuario}
-          initialParams={{ usuarios, setUsuarios }}
-        />
-        <Stack.Screen
-          name="Lista"
-          component={Lista}
-          initialParams={{ contatos, setContatos }}
-        />
-        <Stack.Screen name="CadastroContato" component={CadastroContato} />
-        <Stack.Screen name="EditarContato" component={EditarContato} />
+        <Stack.Screen name="Login">
+          {(props) => (
+            <Login {...props} usuarios={usuarios} contatos={contatos} setContatos={setContatos} />
+          )}
+        </Stack.Screen>
+
+        <Stack.Screen name="CadastroUsuario">
+          {(props) => (
+            <CadastroUsuario {...props} usuarios={usuarios} setUsuarios={setUsuarios} />
+          )}
+        </Stack.Screen>
+
+        <Stack.Screen name="Lista">
+          {(props) => (
+            <Lista {...props} contatos={contatos} setContatos={setContatos} />
+          )}
+        </Stack.Screen>
+
+        <Stack.Screen name="CadastroContato">
+          {(props) => (
+            <CadastroContato {...props} contatos={contatos} setContatos={setContatos} />
+          )}
+        </Stack.Screen>
+
+        <Stack.Screen name="EditarContato">
+          {(props) => (
+            <EditarContato {...props} contatos={contatos} setContatos={setContatos} />
+          )}
+        </Stack.Screen>
       </Stack.Navigator>
     </NavigationContainer>
   );
