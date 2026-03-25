@@ -8,51 +8,79 @@ import {
   Button,
   FlatList,
   TouchableOpacity,
-  StyleSheet
+  StyleSheet,
+  Alert
 } from 'react-native';
 
 const Stack = createNativeStackNavigator();
 
-
 function Login({ navigation }) {
+  const [login, setLogin] = useState('');
+  const [senha, setSenha] = useState('');
+
+  function entrar() {
+    if (!login || !senha) {
+      Alert.alert("Erro", "Preencha todos os campos!");
+      return;
+    }
+    navigation.navigate("Lista");
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Login</Text>
 
-      <TextInput style={styles.input} placeholder="Login" />
-      <TextInput style={styles.input} placeholder="Senha" secureTextEntry />
+      <TextInput style={styles.input} placeholder="Login" onChangeText={setLogin} />
+      <TextInput style={styles.input} placeholder="Senha" secureTextEntry onChangeText={setSenha} />
 
-      <Button title="Entrar" onPress={() => navigation.navigate("Lista")} />
+      <Button title="Entrar" onPress={entrar} />
       <Button title="Cadastre-se" onPress={() => navigation.navigate("CadastroUsuario")} />
     </View>
   );
 }
 
-function CadastroUsuario({ navigation }) {
+function CadastroUsuario({ navigation, route }) {
+  const { usuarios, setUsuarios } = route.params;
+
+  const [nome, setNome] = useState('');
+  const [cpf, setCpf] = useState('');
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
+
+  function salvar() {
+    if (!nome || !cpf || !email || !senha) {
+      Alert.alert("Erro", "Preencha todos os campos!");
+      return;
+    }
+
+    const novoUsuario = {
+      id: Date.now().toString(),
+      nome,
+      cpf,
+      email,
+      senha
+    };
+
+    setUsuarios([...usuarios, novoUsuario]);
+    navigation.goBack();
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Cadastro de Usuário</Text>
 
-      <TextInput style={styles.input} placeholder="Nome" />
-      <TextInput style={styles.input} placeholder="CPF" />
-      <TextInput style={styles.input} placeholder="Email" />
-      <TextInput style={styles.input} placeholder="Senha" />
+      <TextInput style={styles.input} placeholder="Nome" onChangeText={setNome} />
+      <TextInput style={styles.input} placeholder="CPF" onChangeText={setCpf} />
+      <TextInput style={styles.input} placeholder="Email" onChangeText={setEmail} />
+      <TextInput style={styles.input} placeholder="Senha" onChangeText={setSenha} />
 
-      <Button title="Salvar" onPress={() => navigation.goBack()} />
+      <Button title="Salvar" onPress={salvar} />
     </View>
   );
 }
 
-function Lista({ navigation }) {
-
-  const [contatos, setContatos] = useState([
-    {
-      id: '1',
-      nome: "Marcos Andrade",
-      telefone: "81 988553424",
-      email: "marcos@gmail.com"
-    }
-  ]);
+function Lista({ navigation, route }) {
+  const { contatos, setContatos } = route.params;
 
   return (
     <View style={styles.container}>
@@ -87,7 +115,6 @@ function Lista({ navigation }) {
 }
 
 function CadastroContato({ route, navigation }) {
-
   const { contatos, setContatos } = route.params;
 
   const [nome, setNome] = useState('');
@@ -95,6 +122,11 @@ function CadastroContato({ route, navigation }) {
   const [email, setEmail] = useState('');
 
   function salvar() {
+    if (!nome || !telefone || !email) {
+      Alert.alert("Erro", "Preencha todos os campos!");
+      return;
+    }
+
     const novo = {
       id: Date.now().toString(),
       nome,
@@ -120,7 +152,6 @@ function CadastroContato({ route, navigation }) {
 }
 
 function EditarContato({ route, navigation }) {
-
   const { contato, contatos, setContatos } = route.params;
 
   const [nome, setNome] = useState(contato.nome);
@@ -157,12 +188,31 @@ function EditarContato({ route, navigation }) {
 }
 
 export default function App() {
+  const [contatos, setContatos] = useState([
+    {
+      id: '1',
+      nome: "Marcos Andrade",
+      telefone: "81 988553424",
+      email: "marcos@gmail.com"
+    }
+  ]);
+
+  const [usuarios, setUsuarios] = useState([]);
+
   return (
     <NavigationContainer>
       <Stack.Navigator>
         <Stack.Screen name="Login" component={Login} />
-        <Stack.Screen name="CadastroUsuario" component={CadastroUsuario} />
-        <Stack.Screen name="Lista" component={Lista} />
+        <Stack.Screen
+          name="CadastroUsuario"
+          component={CadastroUsuario}
+          initialParams={{ usuarios, setUsuarios }}
+        />
+        <Stack.Screen
+          name="Lista"
+          component={Lista}
+          initialParams={{ contatos, setContatos }}
+        />
         <Stack.Screen name="CadastroContato" component={CadastroContato} />
         <Stack.Screen name="EditarContato" component={EditarContato} />
       </Stack.Navigator>
