@@ -11,10 +11,11 @@ import {
   StyleSheet,
   Alert
 } from 'react-native';
+import { FontAwesome } from '@expo/vector-icons';
 
 const Stack = createNativeStackNavigator();
 
-function Login({ navigation, usuarios, contatos, setContatos }) {
+function Login({ navigation, usuarios, setUsuarioLogado }) {
   const [login, setLogin] = useState('');
   const [senha, setSenha] = useState('');
 
@@ -23,14 +24,32 @@ function Login({ navigation, usuarios, contatos, setContatos }) {
       Alert.alert("Erro", "Preencha todos os campos!");
       return;
     }
+
+    const usuario = usuarios.find(
+      (u) => u.email === login && u.senha === senha
+    );
+
+    if (!usuario) {
+      Alert.alert("Erro", "Usuário ou senha inválidos!");
+      return;
+    }
+
+    setUsuarioLogado(usuario);
     navigation.navigate("Lista");
   }
 
   return (
     <View style={styles.container}>
+      <FontAwesome 
+        name="user-circle" 
+        size={80} 
+        color="#4CAF50" 
+        style={{ alignSelf: 'center', marginBottom: 20 }} 
+      />
+
       <Text style={styles.title}>Login</Text>
 
-      <TextInput style={styles.input} placeholder="Login" onChangeText={setLogin} />
+      <TextInput style={styles.input} placeholder="Email" onChangeText={setLogin} />
       <TextInput style={styles.input} placeholder="Senha" secureTextEntry onChangeText={setSenha} />
 
       <Button title="Entrar" onPress={entrar} />
@@ -77,15 +96,17 @@ function CadastroUsuario({ navigation, usuarios, setUsuarios }) {
   );
 }
 
-function Lista({ navigation, contatos, setContatos }) {
+function Lista({ navigation, contatos, usuarioLogado }) {
+  const contatosUsuario = contatos.filter(
+    (c) => c.usuarioId === usuarioLogado?.id
+  );
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Lista de Contatos</Text>
 
-      <Button title="Adicionar Contato" onPress={() => navigation.navigate("CadastroContato")} />
-
       <FlatList
-        data={contatos}
+        data={contatosUsuario}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <TouchableOpacity
@@ -103,7 +124,7 @@ function Lista({ navigation, contatos, setContatos }) {
   );
 }
 
-function CadastroContato({ navigation, contatos, setContatos }) {
+function CadastroContato({ navigation, contatos, setContatos, usuarioLogado }) {
   const [nome, setNome] = useState('');
   const [telefone, setTelefone] = useState('');
   const [email, setEmail] = useState('');
@@ -118,7 +139,8 @@ function CadastroContato({ navigation, contatos, setContatos }) {
       id: Date.now().toString(),
       nome,
       telefone,
-      email
+      email,
+      usuarioId: usuarioLogado.id
     };
 
     setContatos([...contatos, novo]);
@@ -177,37 +199,62 @@ function EditarContato({ navigation, route, contatos, setContatos }) {
 export default function App() {
   const [contatos, setContatos] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
+  const [usuarioLogado, setUsuarioLogado] = useState(null);
 
   return (
     <NavigationContainer>
       <Stack.Navigator>
         <Stack.Screen name="Login">
           {(props) => (
-            <Login {...props} usuarios={usuarios} contatos={contatos} setContatos={setContatos} />
+            <Login {...props} usuarios={usuarios} 
+            setUsuarioLogado={setUsuarioLogado} />
           )}
         </Stack.Screen>
 
         <Stack.Screen name="CadastroUsuario">
           {(props) => (
-            <CadastroUsuario {...props} usuarios={usuarios} setUsuarios={setUsuarios} />
+            <CadastroUsuario {...props} 
+            usuarios={usuarios} 
+            setUsuarios={setUsuarios} />
           )}
         </Stack.Screen>
 
-        <Stack.Screen name="Lista">
+        <Stack.Screen name="Lista"
+        options={({ navigation }) => ({
+            title: 'Contatos',
+            headerTitleAlign: 'center',
+            headerRight: () => (
+              <TouchableOpacity onPress={() => navigation.navigate('CadastroContato')}>
+                <Text style={{ fontSize: 30, marginRight: 15 }}>+</Text>
+              </TouchableOpacity>
+            ),
+          })}>
           {(props) => (
-            <Lista {...props} contatos={contatos} setContatos={setContatos} />
+            <Lista {...props} 
+            contatos={contatos} 
+            usuarioLogado={usuarioLogado} />
           )}
+          
         </Stack.Screen>
 
         <Stack.Screen name="CadastroContato">
           {(props) => (
-            <CadastroContato {...props} contatos={contatos} setContatos={setContatos} />
+            <CadastroContato 
+              {...props} 
+              contatos={contatos} 
+              setContatos={setContatos}
+              usuarioLogado={usuarioLogado}
+            />
           )}
         </Stack.Screen>
 
         <Stack.Screen name="EditarContato">
           {(props) => (
-            <EditarContato {...props} contatos={contatos} setContatos={setContatos} />
+            <EditarContato 
+              {...props} 
+              contatos={contatos} 
+              setContatos={setContatos}
+            />
           )}
         </Stack.Screen>
       </Stack.Navigator>
